@@ -1,0 +1,573 @@
+openapi: 3.0.1
+info:
+  title: Warframe.market API
+  contact:
+    name: KycKyc
+    url: https://discord.gg/jyPe5pQ
+  version: 1.0.0
+externalDocs:
+  description: Google Doc Source
+  url: https://docs.google.com/document/d/1121cjBNN4BeZdMBGil6Qbuqse-sWpEXPpitQH5fb_Fo/edit#
+servers:
+- url: https://api.warframe.market/v1
+paths:
+  /items:
+    get:
+      summary: Get all known items
+      responses:
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+        200:
+          description: All items in a short form to make them easier to look up
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/items_payload'
+          x-oad-type: response
+    x-oad-type: operation
+  /items/{url_name}:
+    get:
+      summary: Gets a single item payload by url name
+      parameters:
+        - $ref: '#/components/parameters/url_name'
+      responses:
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+        200:
+          description: All items in a short form to make them easier to look up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/long_item'
+          x-oad-type: response
+    x-oad-type: operation
+  /items/{url_name}/orders:
+    get:
+      summary: Gets orders for a single item by url name
+      parameters:
+        - $ref: '#/components/parameters/url_name'
+      responses:
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+        200:
+          description: Orders for the item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/order'
+          x-oad-type: response
+    x-oad-type: operation
+  /items/{url_name}/statistics:
+    get:
+      summary: Item statistics
+      parameters:
+        - $ref: '#/components/parameters/url_name'
+      responses:
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+        200:
+          description: Item statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+                    properties:
+                      statistics_closed:
+                        type: object
+                        items:
+                          $ref: '#/components/schemas/statistics'
+                      statistics_live:
+                        type: object
+                        items:
+                          $ref: '#/components/schemas/statistics'
+          x-oad-type: response
+    x-oad-type: operation
+  /most_recent:
+    get:
+      summary: Gets orders for the last 4 hours
+      responses:
+        200:
+          description: Orders for the last 4 hours
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/order'
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+  /auth/signin:
+    post:
+      summary: Login
+      responses:
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+  /auth/signout:
+    get:
+      summary: Logout
+      responses:
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+    x-oad-type: operation
+  /auth/registration:
+    post:
+      summary: Registration
+      responses:
+        404:
+          description: Generic error response
+          content:
+            application/json:
+              schema:
+                title: error
+                type: object
+                properties:
+                  error:
+                    title: error
+                    type: string
+                    description: An error message
+  /profile:
+    get:
+      summary: Get a the current user's profile
+      security:
+        - OAuth2: [read]
+      responses:
+        200:
+          description: Orders for the item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+  /profile/customization:
+    post:
+      summary: Manage current user profile customization, like uploading avatar/background
+      security:
+        - OAuth2: [write]
+      responses:
+        401:
+          $ref: '#/components/responses/error'
+  /profile/{user_name}:
+    get:
+      summary: Get a user's profile
+      security:
+        - OAuth2: [read]
+      parameters:
+        - $ref: '#/components/parameters/user_name'
+      responses:
+        200:
+          description: Orders for the item
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+        404:
+          $ref: '#/components/responses/error'
+        401:
+          $ref: '#/components/responses/error'
+components:
+  schemas:
+    short_item_arr:
+      title: items
+      type: array
+      description: Generic type containing data for items
+      items:
+        $ref: '#/components/schemas/short_item'
+      x-oad-type: array
+    short_item:
+      title: item
+      type: object
+      properties:
+        id:
+          title: id
+          type: string
+          x-oad-type: string
+        url_name:
+          title: url_name
+          type: string
+          description: String that can be used to identify the item from the API
+          x-oad-type: string
+        item_name:
+          title: item_name
+          type: string
+          description: Formatted string name of the item
+          x-oad-type: string
+        thumb:
+          $ref: '#/components/schemas/icon'
+      description: An item with only a few fields
+      x-oad-type: object
+    long_item:
+      title: long_item
+      type: object
+      properties:
+        id:
+          title: id
+          type: string
+          x-oad-type: string
+        icon_format:
+          $ref: '#/components/schemas/icon_format'
+        mastery_level:
+          title: mastery_level
+          type: number
+          description: The Mastery Rank at which the item becomes usable/tradable/buildable
+          format: float
+          default: 0.0
+          x-oad-type: number
+        trading_tax:
+          title: trading_tax
+          type: number
+          description: Tax applied for trading the item. The person receiving the
+            item pays the tax.
+          format: float
+          x-oad-type: number
+        tags:
+          title: tags
+          type: array
+          items:
+            $ref: '#/components/schemas/tag'
+          x-oad-type: array
+        icon:
+          $ref: '#/components/schemas/icon'
+        set_root:
+          title: set_root
+          type: boolean
+          description: Whether or not this is the root item of the set
+          x-oad-type: boolean
+        sub_icon:
+          $ref: '#/components/schemas/icon'
+        url_name:
+          $ref: '#/components/schemas/url_name'
+        fr:
+          $ref: '#/components/schemas/translated_item'
+        ko:
+          $ref: '#/components/schemas/translated_item'
+        zh:
+          $ref: '#/components/schemas/translated_item'
+        sv:
+          $ref: '#/components/schemas/translated_item'
+        de:
+          $ref: '#/components/schemas/translated_item'
+        ru:
+          $ref: '#/components/schemas/translated_item'
+        en:
+          $ref: '#/components/schemas/translated_item'
+      description: Long item
+      x-oad-type: object
+    icon_format:
+      title: icon_format
+      type: string
+      enum:
+      - land
+      x-oad-type: string
+    tag:
+      title: tag
+      type: string
+      description: A common identifier for grouping items
+      enum:
+      - blueprint
+      - prime
+      - parts
+      - blade
+      - hilt
+      - set
+      x-oad-type: string
+    icon:
+      title: icon
+      type: string
+      description: Image route. This can be appended on `https://api.warframe.market/v1/`
+        to resolve the image
+      x-oad-type: string
+    url_name:
+      title: url_name
+      type: string
+      description: String that can be used to identify the item from the API
+      x-oad-type: string
+    translated_item:
+      title: translated_item
+      type: object
+      properties:
+        item_name:
+          title: item_name
+          type: string
+          description: Name of the item
+          x-oad-type: string
+        description:
+          title: description
+          type: string
+          description: HTML formatted description
+          x-oad-type: string
+        wiki_link:
+          title: wiki_link
+          type: string
+          description: Link to the item on the [Warframe Wikia](https://warframe.fandom.com)
+          x-oad-type: string
+        drop:
+          type: array
+          items:
+            $ref: '#/components/schemas/drop'
+          x-oad-type: array
+      description: Objects providing translations for item fields
+      x-oad-type: object
+    drop:
+      title: drop
+      type: object
+      properties:
+        name:
+          title: name
+          type: string
+          description: Where the item drops
+          x-oad-type: string
+        link:
+          type: string
+          description: Link to where the item drops(?)
+          x-oad-type: string
+      description: Describes where an item can drop
+      x-oad-type: object
+    items_payload:
+      title: payload
+      type: object
+      properties:
+        payload:
+          type: object
+          properties:
+            items:
+              $ref: '#/components/schemas/short_item_arr'
+      description: Payload for all items
+      x-oad-type: object
+    order:
+      title: order
+      type: object
+      properties:
+        creation_date:
+          title: creation_date
+          type: string
+          x-oad-type: string
+        visible:
+          title: visible
+          type: boolean
+          description: Whether or not the order is visible
+          x-oad-type: boolean
+        quantity:
+          type: object
+        user:
+          $ref: '#/components/schemas/user'
+        platform:
+          $ref: '#/components/schemas/platform'
+        region:
+          $ref: '#/components/schemas/region'
+        platinum:
+          title: platinum
+          type: number
+          description: Amount of platinum attributed to the order
+          format: float
+          x-oad-type: number
+        last_update:
+          title: last_update
+          type: string
+          description: Timestamp of the last time that the order was updated
+          format: date
+          x-oad-type: string
+        order_type:
+          $ref: '#/components/schemas/order_type'
+        id:
+          title: id
+          type: string
+          description: Order id
+          x-oad-type: string
+      description: Describes an order
+      x-oad-type: object
+    user:
+      title: user
+      type: object
+      properties:
+        ingame_name:
+          title: ingame_name
+          type: string
+          description: User's IGN
+          x-oad-type: string
+        last_seen:
+          title: last_seen
+          type: string
+          description: last time user was seen
+          format: date
+          x-oad-type: string
+        reputation_bonus:
+          title: reputation_bonus
+          type: number
+          description: bonus reputation the user has earned
+          format: float
+          default: 0.0
+          x-oad-type: number
+        reputation:
+          title: reputation
+          type: number
+          description: Total reputation the user has earned
+          format: float
+          default: 0.0
+          x-oad-type: number
+        region:
+          $ref: '#/components/schemas/region'
+        avatar:
+          $ref: '#/components/schemas/icon'
+        status:
+          $ref: '#/components/schemas/status'
+        id:
+          type: string
+          x-oad-type: string
+      description: Data as to the user who submitted the buy or sell order
+      x-oad-type: object
+    status:
+      title: status
+      type: string
+      description: Describes a user's visiblity status
+      enum:
+      - offline
+      - ingame
+      x-oad-type: string
+    platform:
+      title: platform
+      type: string
+      default: pc
+      enum:
+      - pc
+      - xb1
+      - ps4
+      - switch
+      x-oad-type: string
+    region:
+      title: region
+      type: string
+      enum:
+      - en
+      - zh
+      - ru
+      - ko
+      - fr
+      - sv
+      - de
+      x-oad-type: string
+    order_type:
+      title: order_type
+      type: string
+      description: What kind of order it is
+      enum:
+      - buy
+      - sell
+      x-oad-type: string
+    statistics:
+      description: statistics data wrapper
+      type: object
+      properties:
+        '90days':
+          type: array
+          items:
+            $ref: '#/components/schemas/statistic'
+    statistic:
+      type: object
+      properties:
+        donch_top:
+          type: number
+        closed_price:
+          type: number
+        open_price:
+          type: number
+        datetime:
+          type: string
+          format: date
+        min_price:
+          type: number
+        donch_bot:
+          type: number
+        avg_price:
+          type: number
+        max_price:
+          type: number
+        volume:
+          type: number
+        id:
+          type: string
+        median:
+          type: number
+  responses:
+    error:
+      description: Generic error response
+      content:
+        application/json:
+          schema:
+            title: error
+            type: object
+            properties:
+              error:
+                title: error
+                type: string
+                description: An error message
+                x-oad-type: string
+            x-oad-type: object
+      x-oad-type: response
+  parameters:
+    url_name:
+      name: url_name
+      in: path
+      description: The desired url_name to get data for
+      required: true
+      schema:
+        type: string
+    user_name:
+      name: user_name
+      in: path
+      description: User's name
+      required: true
+      schema:
+        type: string
+  securitySchemes:
+    OAuth2: 
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /auth/signin
+          tokenUrl: /auth???
+          scopes:
+            read: Grants read access
