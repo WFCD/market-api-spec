@@ -571,3 +571,4 @@ components:
           tokenUrl: /auth???
           scopes:
             read: Grants read access
+            write: Grants write access
