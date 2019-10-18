@@ -1,0 +1,8 @@
+specFileName: 'C:\Users\Matt\Downloads\swagger2.yaml'
+apiTitle: Warframe.Market
+splitSpec: false
+codeSamples: false
+swaggerUI: true
+travis: true
+repo: wfcd/market-api-spec
+oasVersion: 3.0.1
