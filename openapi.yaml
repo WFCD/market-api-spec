@@ -393,16 +393,60 @@ paths:
                     properties:
                       own_review:
                         type: boolean
-                        default: null
+                        default: false
                       reviews:
                         type: array
                         items:
                           $ref: '#/components/schemas/review'
                       total_review_count:
-                        type: number
-                        format: int
+                        type: integer
                       user:
                         $ref: '#/components/schemas/user'
+  # TODO:
+  #    /settings [GET]  -  Verification, Platform, Prefered lang and Ingame name
+  #    /settings [PATCH] -  Update  Platform or Prefered lang.
+  #    
+  #    /settings/subscription [GET] -  Get information about subscription
+  #    /settings/notifications [GET, PUT] - Get | patch info about notification settings.
+  #    /settings/ads [GET, PUT] - Get | patch info about ads settings.
+  #    /settings/accounts [GET, PUT] - Get | patch info about linked accounts. (Steam, Patreon, Xbox, PS4)
+
+  /statistics:
+    get:
+      tags:
+        - Statistics
+      summary: Get global market statistics
+      responses:
+        default:
+          $ref: '#/components/responses/error'
+        200:
+          description: All statistics. Seems to be an empty object right now.
+          content:
+            application/json:
+              schema:
+                type: object
+  /auctions:
+    get:
+      tags:
+        - Rivens
+      summary: Get all current auction items
+      responses:
+        default:
+          $ref: '#/components/responses/error'
+        200:
+          description: All auctions
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  payload:
+                    type: object
+                    properties:
+                      auctions:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/auction'
 components:
   schemas:
     achievement:
@@ -427,6 +471,113 @@ components:
       type: string
       enum:
         - patreon
+    auction:
+      type: object
+      properties:
+        buyout_price:
+          type: integer
+          default: 0
+        minimal_reputation:
+          type: integer
+          default: 0
+          description: Minimum required reputation required to participat
+        note:
+          type: string
+          description: Poster-provided note with raw HTML tags
+        item:
+          $ref: '#/components/schemas/auction_item'
+        private:
+          type: boolean
+          default: false
+          description: Whether or not the auction is private
+        starting_price:
+          type: integer
+          default: 0
+          description: Starting auction price
+        owner:
+          $ref: '#/components/schemas/user'
+        platform:
+          $ref: '#/components/schemas/platform'
+        closed:
+          type: boolean
+          description: Whether or not the auction has been closed
+        top_bid:
+          type: integer
+          # needs check
+        winner:
+          $ref: '#/components/schemas/user'
+        is_marked_for:
+          type: object
+          default: null
+          description: Couldn't find any meaning for this. No values were non-null.
+        marked_operation_at:
+          type: object
+          default: null
+          description: Couldn't find any meaning for this. No values were non-null.
+        created:
+          type: string
+          format: date
+          description: When the auction was created
+        updated:
+          type: string
+          format: date
+          description: When the auction was last updated
+        note_raw:
+          type: string
+          default: ""
+          description: Raw string of note text without wrapping HTML tags, with escaped entities
+        is_direct_sale:
+          type: boolean
+          default: false
+          description: Whether or not this is a direct sell or a bidding auction
+        id:
+          type: string
+          
+    auction_item:
+      type: object
+      properties:
+        attributes:
+          type: array
+          maxLength: 4
+          minLength: 2
+          items:
+            type: object
+            properties:
+              value:
+                type: number
+                format: float
+                default: 0
+                description: Numerical value of the riven stat
+              postive:
+                type: boolean
+                description: Whether or not the stat is considered a boon or a curse.
+                default: true
+              url_name:
+                $ref: '#/components/schemas/url_name'
+        polarity:
+          $ref: '#/components/schemas/polarity'
+        mod_rank:
+          type: integer
+          default: 0
+          minimum: 0
+          maximum: 8
+          description: Rank of the mod from 0-8
+        name:
+          type: string
+          description: Unique name for the Riven
+        re_rolls:
+          type: integer
+          description: Number of times the mod has been rolled
+          default: 0
+        mastery_level:
+          type: integer
+          default: 8
+          minimum: 8
+          maximum: 16
+        weapon_url_name:
+          $ref: '#/components/schemas/url_name'
+        type:
+          $ref: '#/components/schemas/item_type'
     drop:
       title: drop
       type: object
@@ -449,6 +600,10 @@ components:
       type: string
       enum:
       - land
+    item_type:
+      type: string
+      enum:
+        - riven
     items_payload:
       title: payload
       type: object
@@ -470,16 +625,14 @@ components:
           $ref: '#/components/schemas/icon_format'
         mastery_level:
           title: mastery_level
-          type: number
+          type: integer
           description: The Mastery Rank at which the item becomes usable/tradable/buildable
-          format: int
           default: 0
         trading_tax:
           title: trading_tax
-          type: number
+          type: integer
           description: Tax applied for trading the item. The person receiving the
             item pays the tax.
-          format: int
           default: 0
         tags:
           title: tags
@@ -578,6 +731,17 @@ components:
       - xb1
       - ps4
       - switch
+    polarity:
+      type: string
+      description: Enumerated identifier for a polarity
+      enum:
+        - madurai
+        - vazarin
+        - naramin
+        - unairu
+        - zenurik
+        - penjaga
+        - umbra
     region:
       title: region
       type: string
@@ -606,8 +770,7 @@ components:
         user_from:
           $ref: '#/components/schemas/user'
         review_type:
-          type: number
-          format: int
+          type: integer
           description: Probably a type id, but no idea what correlation it has.
         id:
           type: string
@@ -739,15 +902,13 @@ components:
           format: date
         reputation_bonus:
           title: reputation_bonus
-          type: number
+          type: integer
           description: Bonus reputation the user has earned. Excluded from object if retrieved from a review.
-          format: int
           default: 0
         reputation:
           title: reputation
-          type: number
+          type: integer
           description: Total reputation the user has earned
-          format: float
           default: 0
         region:
           $ref: '#/components/schemas/region'
@@ -796,8 +957,7 @@ components:
         check_code:
           type: string
         unread_messages:
-          type: number
-          format: int
+          type: integer
           description: How many unread messages user has
         banned:
           type: boolean
