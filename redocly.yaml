@@ -1,4 +1,4 @@
-specFileName: 'C:\Users\Matt\Downloads\swagger2.yaml'
+specFileName: './openapi.yaml'
 apiTitle: Warframe.Market
 splitSpec: false
 codeSamples: false
