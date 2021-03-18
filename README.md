@@ -1,3 +1,9 @@
+# DEPRECATION
+---
+
+This repo won't be updated anymore, as Warframe.Market... finally published their own! [See here](https://warframe.market/api_docs)
+
+
 # Warframe.Market OpenAPI Specification
 [![Build Status](https://travis-ci.com/wfcd/market-api-spec.svg?branch=master)](https://travis-ci.com/wfcd/market-api-spec)
 
